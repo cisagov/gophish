@@ -45,6 +45,13 @@ jobs:
               run: echo "RELEASE=gophish-${{ github.event.release.tag_name }}-${{ matrix.releaseos}}-32bit" >> $GITHUB_ENV
             - if: matrix.arch == 'amd64'
               run: echo "RELEASE=gophish-${{ github.event.release.tag_name}}-${{ matrix.releaseos}}-64bit" >> $GITHUB_ENV
+              # GitHub's default shell for Windows environments is Powershell,
+              # which ignores the RELEASE env variables set above, so we must
+              # use Powershell syntax to set the RELEASE variable in Windows.
+              # For details, see
+              # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#using-a-specific-shell
+            - if: matrix.os == 'windows-latest'
+              run: echo "RELEASE=gophish-${{ github.event.release.tag_name}}-${{ matrix.releaseos}}-64bit" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
             - uses: actions/checkout@v2
             - name: Build ${{ matrix.goos }}/${{ matrix.arch }}
               run: go build -o ${{ matrix.bin }}
